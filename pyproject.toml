@@ -1,0 +1,31 @@
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 120
+exclude = [
+  "migrations",
+  ".git",
+  ".vim",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".tox",
+  ".venv",
+  "build",
+  "dist",
+  "venv/",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+# extend-exclude = ["*.pyi"]
+preview = true
+
+[tool.ruff.lint]
+ignore = ["E711", "E712", "F403", "F405"]
+fixable = ['ALL']
+select = [
+  'I',
+  'F401'
+]
