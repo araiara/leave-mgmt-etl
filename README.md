@@ -1,7 +1,10 @@
 # Leave Management ETL
-
 ## Local Setup
 ### Using Docker
+Clone the repository.
+```
+git clone git@github.com:araiara/leave-mgmt-etl.git
+```
 Go to the project working directory and build docker image.
 ```
 docker-compose up --build -d
