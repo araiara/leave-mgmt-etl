@@ -1,9 +1,9 @@
 import requests
 from pydantic import parse_obj_as
 
-from leave_mgmt.config.config import Settings
-from leave_mgmt.database.database import DB
-from leave_mgmt.models.models import FlatFile
+from leave_mgmt.config import ExtractConfig, Settings
+from leave_mgmt.database import DB
+from leave_mgmt.models import FlatFile
 from leave_mgmt.pipeline.schema import LeaveEventSchema
 
 
@@ -16,8 +16,8 @@ class Extract:
     def fetch_records_from_api(self, api_url: str, bearer_token: str, batch_size: int, page: int) -> dict:
         query_params = {
             "fetchType": "all",
-            "startDate": "2021-07-17",
-            "endDate": "2024-04-23",
+            "startDate": ExtractConfig.START_DATE.value,
+            "endDate": ExtractConfig.END_DATE.value,
             "size": batch_size,
             "roleType": "issuer",
             "page": page,
@@ -37,7 +37,7 @@ class Extract:
         Fetch data from API and store to raw flatfile.
         """
         page = 1
-        batch_size = 11000
+        batch_size = ExtractConfig.BATCH_SIZE.value
         total_fetched_data_size = 0
         api_url = self.config.source_api_endpoint
         bearer_token = self.config.auth_bearer_token
@@ -49,6 +49,7 @@ class Extract:
 
             # batch insertion
             leave_records = parse_obj_as(list[LeaveEventSchema], payload["data"])
+            self.logger.info(f"Insert {batch_size=}.")
             self.insert_into_raw_flatfile(leave_records)
 
             page += 1

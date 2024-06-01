@@ -22,4 +22,10 @@ class SqlDirPaths(str, Enum):
     LOAD_SQL_DIR = "leave_mgmt/sql/load"
 
 
-__all__ = ["Settings", "SqlDirPaths"]
+class ExtractConfig(Enum):
+    BATCH_SIZE = 5000
+    START_DATE = "2021-07-17"
+    END_DATE = "2024-04-23"
+
+
+__all__ = ["Settings", "SqlDirPaths", "ExtractConfig"]
