@@ -5,6 +5,16 @@ Clone the repository.
 ```
 git clone git@github.com:araiara/leave-mgmt-etl.git
 ```
+Set up environment variables.
+```
+DB_NAME=
+DB_PORT=
+DB_USERNAME=
+DB_PASSWORD=
+DB_HOST_NAME=
+SOURCE_API_ENDPOINT=
+AUTH_BEARER_TOKEN=
+```
 Go to the project working directory and build docker image.
 ```
 docker-compose up --build -d
@@ -26,7 +36,7 @@ Creates
 
 ### Run ETL Pipeline
 ```
-docker-compose run leave_mgmt_data_pipeline python main.py
+docker-compose run etl python main.py
 ```
 Link to access the following services:
 | Service | URL   |
