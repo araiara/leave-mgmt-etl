@@ -35,6 +35,12 @@ Creates
 - Required tables on each schema
 
 ### Run ETL Pipeline
+Update configs for extraction if required in `leave_mgmt/config/config.py`, the default values are:
+```
+BATCH_SIZE = 5000
+START_DATE = "2021-07-17"
+END_DATE = "2024-04-23"
+```
 ```
 docker-compose run etl python main.py
 ```
