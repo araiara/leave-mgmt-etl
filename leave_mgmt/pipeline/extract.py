@@ -1,4 +1,4 @@
-import requests
+import aiohttp
 from pydantic import parse_obj_as
 
 from leave_mgmt.config import ExtractConfig, Settings
@@ -13,7 +13,7 @@ class Extract:
         self.config = config
         self.logger = logger
 
-    def fetch_records_from_api(self, api_url: str, bearer_token: str, batch_size: int, page: int) -> dict:
+    async def fetch_records_from_api(self, api_url: str, bearer_token: str, batch_size: int, page: int) -> dict:
         query_params = {
             "fetchType": "all",
             "startDate": ExtractConfig.START_DATE.value,
@@ -24,17 +24,17 @@ class Extract:
         }
 
         headers = {"Authorization": f"Bearer {bearer_token}"}
-        response = requests.get(api_url, headers=headers, params=query_params)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(api_url, headers=headers, params=query_params) as response:
+                if response.status == 200:
+                    payload = await response.json()
+                    return payload
+                else:
+                    self.logger.error(f"Request failed with status code {response.status}")
 
-        if response.status_code == 200:
-            payload = response.json()
-            return payload
-        else:
-            self.logger.error(f"Request failed with status code {response.status_code}")
-
-    def run_extraction(self) -> None:
+    async def run_extraction(self) -> None:
         """
-        Fetch data from API and store to raw flatfile.
+        Fetch data from API and store to raw flatfile asynchronously.
         """
         page = 1
         batch_size = ExtractConfig.BATCH_SIZE.value
@@ -43,14 +43,14 @@ class Extract:
         bearer_token = self.config.auth_bearer_token
 
         while True:
-            payload = self.fetch_records_from_api(api_url, bearer_token, batch_size, page)
+            payload = await self.fetch_records_from_api(api_url, bearer_token, batch_size, page)
             total_data_size = payload.get("meta", {}).get("total", 0)
             fetched_data_size = payload.get("meta", {}).get("size", 0)
 
             # batch insertion
             leave_records = parse_obj_as(list[LeaveEventSchema], payload["data"])
-            self.logger.info(f"Insert {batch_size=}.")
-            self.insert_into_raw_flatfile(leave_records)
+            self.logger.info(f"Inserted {fetched_data_size} records.")
+            await self.insert_into_raw_flatfile(leave_records)
 
             page += 1
             total_fetched_data_size += fetched_data_size
@@ -58,9 +58,9 @@ class Extract:
             if total_fetched_data_size == total_data_size:
                 break
 
-    def insert_into_raw_flatfile(self, leave_records: list[LeaveEventSchema]) -> None:
+    async def insert_into_raw_flatfile(self, leave_records: list[LeaveEventSchema]) -> None:
         """
-        Insert record into raw flatfile table.
+        Insert record into raw flatfile table asynchronously.
         """
         with self.db.session_scope() as session:
             for leave_record in leave_records:

@@ -1,3 +1,5 @@
+import asyncio
+
 from loguru import logger
 
 from leave_mgmt.config import Settings, SqlDirPaths
@@ -14,7 +16,7 @@ class DataPipeline:
 
     def run_pipeline(self):
         extract = Extract(config=self.config, db=self.db, logger=self.logger)
-        extract.run_extraction()
+        asyncio.run(extract.run_extraction())
 
         transform_load = TransformLoad(db=self.db, logger=logger)
         transform_load.run_sql_scripts(

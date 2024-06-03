@@ -14,6 +14,7 @@ setup(
         "requests==2.26.0",
         "alembic==1.7.3",
         "SQLAlchemy-Utils==0.37.8",
+        "aiohttp==3.9.5",
     ],
     python_requires=">=3.10",
 )
